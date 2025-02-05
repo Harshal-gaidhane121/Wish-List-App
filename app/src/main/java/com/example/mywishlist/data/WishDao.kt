@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class WishDao {
+    git add .
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun addWish(wishEntity : Wish)
