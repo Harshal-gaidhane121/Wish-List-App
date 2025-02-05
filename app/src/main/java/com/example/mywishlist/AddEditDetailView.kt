@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
@@ -21,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mywishlist.data.Wish
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditDetailView(
@@ -28,6 +34,11 @@ fun AddEditDetailView(
     viewModel: WishViewModel,
     navController: NavController
 ){
+
+    val snackMessage= remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    val scaffoldState= rememberScaffoldState()
+
     Scaffold(topBar = {
         AppBarView(title = if(id != 0L){
             "Update List"
@@ -35,7 +46,8 @@ fun AddEditDetailView(
         else{
            "Add List"
         }){navController.navigateUp() }
-    }) {
+    },scaffoldState=scaffoldState
+        ) {
         Column (modifier = Modifier.padding(it),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -60,9 +72,29 @@ fun AddEditDetailView(
             Button(onClick = {
                 if(viewModel.wishTitleState.isNotEmpty() &&
                     viewModel.wishDescriptionState.isNotEmpty()){
-                    //update wish
-                }else{
                     //add wish
+                    if(id !=0L ){
+                    //update wish
+
+                    }
+                    else{
+                        //add wish
+                        viewModel.addWish(
+                            Wish(
+                                title = viewModel.wishTitleState.trim(),
+                                description = viewModel.wishDescriptionState.trim()
+                            )
+                        )
+                        snackMessage.value="Wish has been created"
+                    }
+                }
+                else{
+                    snackMessage.value="Enter the required fields"
+                }
+
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(snackMessage.value)
+                    navController.navigateUp()
                 }
             }
             ) {
